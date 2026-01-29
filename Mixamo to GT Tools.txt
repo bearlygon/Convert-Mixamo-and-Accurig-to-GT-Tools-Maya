@@ -11,7 +11,7 @@ HELP_TEXT = {
     "renameOriginal": "Restores the original naming structure of the mesh or skeleton.",
     "snapBody": "Snaps the entire proxy skeleton to the body mesh so the joints are aligned automatically.",
     "snapHands": "Snaps hand proxy joints to the wrist/hand mesh region using your snapping rules.",
-    "twist": "Creates twist joints for arms or legs to improve deformation and reduce candy-wrapper twisting."
+    "constJnt": "Constraint Mixamo to GT Tools joints to use it controllers for animations.",
 }
 
 # ---------------------------------------------
@@ -33,8 +33,8 @@ def renameProxy(*args):
     'mixamorig:RightFoot': 'right_ankle_jnt',
     'mixamorig:RightToeBase': 'right_ball_jnt',
     'mixamorig:RightToe_End': 'right_toe_jnt',
-    'mixamorig:Spine': 'waist_jnt',
-    'mixamorig:Spine1': 'spine_jnt',
+    'mixamorig:Spine': 'spine02_jnt',
+    'mixamorig:Spine1': 'spine03_jnt',
     'mixamorig:Spine2': 'chest_jnt',
     'mixamorig:Neck': 'neckBase_jnt',
     'mixamorig:Head': 'head_jnt',
@@ -107,8 +107,8 @@ def renameToOriginal(*args):
     'mixamorig:RightFoot': 'right_ankle_jnt',
     'mixamorig:RightToeBase': 'right_ball_jnt',
     'mixamorig:RightToe_End': 'right_toe_jnt',
-    'mixamorig:Spine': 'waist_jnt',
-    'mixamorig:Spine1': 'spine_jnt',
+    'mixamorig:Spine': 'spine02_jnt',
+    'mixamorig:Spine1': 'spine03_jnt',
     'mixamorig:Spine2': 'chest_jnt',
     'mixamorig:Neck': 'neckBase_jnt',
     'mixamorig:Head': 'head_jnt',
@@ -172,7 +172,10 @@ def renameToOriginal(*args):
 # ---------------------------------------------
 snap_list = [
     ("chest_proxy", "mixamorig:Spine2"),
-    ("waist_proxy", "mixamorig:Spine"),
+    ("waist_proxy", "mixamorig:Hips"),
+    ("spine01_proxy", "mixamorig:Hips"),
+    ("spine02_proxy", "mixamorig:Spine"),
+    ("spine03_proxy", "mixamorig:Spine1"),
     ("right_hip_proxy", "mixamorig:RightUpLeg"),
     ("left_hip_proxy", "mixamorig:LeftUpLeg"),
     ("right_ankle_proxy", "mixamorig:RightFoot"),
@@ -350,6 +353,197 @@ def snapProxyToHands(*args):
 
     print(">>> All hand proxies snapped!")
 
+# ---------------------------------------------
+# BUTTON 5: CONSTRAINT TO JOINTS
+# ---------------------------------------------
+def constraint_to_joints():
+    """
+    GUI Button Function: Creates parent constraints between source and target joints,
+    groups them, and parents the group into 'rig_setup_grp' (if exists).
+    """
+    # Define your mapping — target ? source
+    mapping = {
+'left_hip_jnt': 'mixamorig:LeftUpLeg',
+'left_knee_jnt': 'mixamorig:LeftLeg',
+'left_ankle_jnt': 'mixamorig:LeftFoot',
+'left_ball_jnt': 'mixamorig:LeftToeBase',
+'left_toe_jnt': 'mixamorig:LeftToe_End',
+'right_hip_jnt': 'mixamorig:RightUpLeg',
+'right_knee_jnt': 'mixamorig:RightLeg',
+'right_ankle_jnt': 'mixamorig:RightFoot',
+'right_ball_jnt': 'mixamorig:RightToeBase',
+'right_toe_jnt': 'mixamorig:RightToe_End',
+'pelvis_jnt': 'mixamorig:Hips',
+'spine02_jnt': 'mixamorig:Spine',
+'spine03_jnt': 'mixamorig:Spine1',
+'chest_jnt': 'mixamorig:Spine2',
+'neckBase_jnt': 'mixamorig:Neck',
+'head_jnt': 'mixamorig:Head',
+'head_endJnt': 'mixamorig:HeadTop_End',
+'left_clavicle_jnt': 'mixamorig:LeftShoulder',
+'left_shoulder_jnt': 'mixamorig:LeftArm',
+'left_elbow_jnt': 'mixamorig:LeftForeArm',
+'left_wrist_jnt': 'mixamorig:LeftHand',
+'left_thumb01_jnt': 'mixamorig:LeftHandThumb1',
+'left_thumb02_jnt': 'mixamorig:LeftHandThumb2',
+'left_thumb03_jnt': 'mixamorig:LeftHandThumb3',
+'left_thumb04_endJnt': 'mixamorig:LeftHandThumb4',
+'left_index01_jnt': 'mixamorig:LeftHandIndex1',
+'left_index02_jnt': 'mixamorig:LeftHandIndex2',
+'left_index03_jnt': 'mixamorig:LeftHandIndex3',
+'left_index04_endJnt': 'mixamorig:LeftHandIndex4',
+'left_middle01_jnt': 'mixamorig:LeftHandMiddle1',
+'left_middle02_jnt': 'mixamorig:LeftHandMiddle2',
+'left_middle03_jnt': 'mixamorig:LeftHandMiddle3',
+'left_middle04_endJnt': 'mixamorig:LeftHandMiddle4',
+'left_ring01_jnt': 'mixamorig:LeftHandRing1',
+'left_ring02_jnt': 'mixamorig:LeftHandRing2',
+'left_ring03_jnt': 'mixamorig:LeftHandRing3',
+'left_ring04_endJnt': 'mixamorig:LeftHandRing4',
+'left_pinky01_jnt': 'mixamorig:LeftHandPinky1',
+'left_pinky02_jnt': 'mixamorig:LeftHandPinky2',
+'left_pinky03_jnt': 'mixamorig:LeftHandPinky3',
+'left_pinky04_endJnt': 'mixamorig:LeftHandPinky4',
+'right_clavicle_jnt': 'mixamorig:RightShoulder',
+'right_shoulder_jnt': 'mixamorig:RightArm',
+'right_elbow_jnt': 'mixamorig:RightForeArm',
+'right_wrist_jnt': 'mixamorig:RightHand',
+'right_thumb01_jnt': 'mixamorig:RightHandThumb1',
+'right_thumb02_jnt': 'mixamorig:RightHandThumb2',
+'right_thumb03_jnt': 'mixamorig:RightHandThumb3',
+'right_thumb04_endJnt': 'mixamorig:RightHandThumb4',
+'right_index01_jnt': 'mixamorig:RightHandIndex1',
+'right_index02_jnt': 'mixamorig:RightHandIndex2',
+'right_index03_jnt': 'mixamorig:RightHandIndex3',
+'right_index04_endJnt': 'mixamorig:RightHandIndex4',
+'right_middle01_jnt': 'mixamorig:RightHandMiddle1',
+'right_middle02_jnt': 'mixamorig:RightHandMiddle2',
+'right_middle03_jnt': 'mixamorig:RightHandMiddle3',
+'right_middle04_endJnt': 'mixamorig:RightHandMiddle4',
+'right_ring01_jnt': 'mixamorig:RightHandRing1',
+'right_ring02_jnt': 'mixamorig:RightHandRing2',
+'right_ring03_jnt': 'mixamorig:RightHandRing3',
+'right_ring04_endJnt': 'mixamorig:RightHandRing4',
+'right_pinky01_jnt': 'mixamorig:RightHandPinky1',
+'right_pinky02_jnt': 'mixamorig:RightHandPinky2',
+'right_pinky03_jnt': 'mixamorig:RightHandPinky3',
+'right_pinky04_endJnt': 'mixamorig:RightHandPinky4',
+    }
+
+
+    # Step 1: Run constraint creation
+    result = constraint_to_jnt_dict(mapping)
+
+    # Step 2: Update constraint_list for grouping
+    constraint_list = result["parent_constraints"]
+
+    # Step 3: Create group and parent constraints
+    group_name = "Constraint_to_jnt"
+    if cmds.objExists(group_name):
+        cmds.delete(group_name)
+
+    group = cmds.group(empty=True, name=group_name)
+
+    for constraint in constraint_list:
+        if cmds.objExists(constraint):
+            cmds.parent(constraint, group)
+
+    # Step 4: Parent group into rig_setup_grp
+    parent_group = "rig_setup_grp"
+    if not cmds.objExists(parent_group):
+        cmds.error(f"Parent group '{parent_group}' does not exist. Please create it first.")
+    else:
+        cmds.parent(group, parent_group)
+
+    # Step 5: Hide the group
+    cmds.setAttr(group + ".visibility", 0)
+
+    print(f"? Group '{group}' created, parented into '{parent_group}', and hidden.")
+
+    # Optional: Also run parent_mixamorig:Hips_to_root_jnt()
+    parent_mixamorig_Hips_to_root_jnt()
+
+
+# ---------------------------------------------
+# UTILITY FUNCTION: CREATE PARENT CONSTRAINTS
+# ---------------------------------------------
+def constraint_to_jnt_dict(target_to_source_map):
+    """
+    Constraints source joints to target joints using:
+    - Parent constraint (translation/rotation)
+
+    Args:
+        target_to_source_map (dict): Dictionary mapping target joint names to source joint names.
+        Example:
+            {
+                'CC_Base_R_Foot': 'right_ankle_jnt',
+                'CC_Base_L_Foot': 'left_ankle_jnt',
+                'CC_Base_R_ToeBase': 'right_ball_jnt',
+                'CC_Base_L_ToeBase': 'left_ball_jnt'
+            }
+
+    Returns:
+        dict: Contains one key:
+            'parent_constraints' ? list of parentConstraint node names
+    """
+    # Validate input
+    if not isinstance(target_to_source_map, dict):
+        raise TypeError("target_to_source_map must be a dictionary.")
+
+    # Initialize return containers
+    parent_constraints = []
+
+    # Process each target ? source pair
+    for target_jnt, source_jnt in target_to_source_map.items():
+        # Validate existence
+        if not cmds.objExists(target_jnt):
+            print(f"?? Skipping target '{target_jnt}' — it does not exist.")
+            continue
+        if not cmds.objExists(source_jnt):
+            print(f"?? Skipping source '{source_jnt}' — it does not exist.")
+            continue
+
+        # Create parent constraint
+        parent_con = cmds.parentConstraint(
+            target_jnt, source_jnt,
+            mo=True  # maintain offset
+        )[0]
+
+        # Append to list
+        parent_constraints.append(parent_con)
+
+        print(f"? Constrained '{source_jnt}' to '{target_jnt}'")
+        print(f"   ? Parent constraint: {parent_con}")
+
+    # Return results
+    return {
+        "parent_constraints": parent_constraints
+    }
+
+
+# ---------------------------------------------
+# UTILITY FUNCTION: PARENT RL_BONE_ROOT TO ROOT_JNT
+# ---------------------------------------------
+def parent_mixamorig_Hips_to_root_jnt():
+    mixamorig_Hips = "mixamorig:Hips"
+    root_jnt = "root_jnt"
+
+    # Check if both nodes exist
+    if not cmds.objExists(mixamorig_Hips):
+        print(f"Node '{mixamorig_Hips}' does not exist.")
+        return
+
+    if not cmds.objExists(root_jnt):
+        print(f"Node '{root_jnt}' does not exist.")
+        return
+
+    # Parent mixamorig:Hips to root_jnt
+    cmds.parent(mixamorig_Hips, root_jnt)
+
+    print(f"Successfully parented '{mixamorig_Hips}' under '{root_jnt}'.")
+
+
+
 
 # ---------------------------------------------
 # HELP POPUP WINDOW
@@ -390,6 +584,7 @@ def openMyRiggerUI():
     addToolButton("2. Rename to Original", renameToOriginal, "renameOriginal")
     addToolButton("3. Snapping Proxy to Body", snapProxyToBody, "snapBody")
     addToolButton("4. Snapping Proxy to Hands", snapProxyToHands, "snapHands")
+    addToolButton("5. Constraint to Joints", constraint_to_joints, "constJnt")
 
     cmds.setParent("..")
     cmds.setParent("..")
