@@ -1,4 +1,4 @@
-# Convert-Mixamo-and-Accurig-to-GT-Tools-Maya
+# GT-Tools-Bonus
 This scripts is my workflow base on https://github.com/TrevisanGMW/gt-tools for convert mixamo or accurig to native gt tools rig.
 # Discription
 The scripts is using GT Tools biped rigger, export/import weight map (built-in maya), mixamo auto-rigger or accurig auto rigger to function. Only works with humanoid rig type.
